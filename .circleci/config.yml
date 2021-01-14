@@ -25,11 +25,13 @@ jobs: # a basic unit of work in a run
           command: xcodebuild ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO
       - run: 
           name: Preserve App Binary
-          command: mv build/Release/circleci-demo-macos.app ~/app/circleci-demo-macos-x86_64.app
+          command: |
+            mkdir ~/app_x86_64
+            mv build/Release/circleci-demo-macos.app ~/app_x86_64/circleci-demo-macos-x86_64.app
       - persist_to_workspace:
           root: ~/
           paths: 
-            - app
+            - app_x86_64
 
   build_arm64:
     executor: macos
@@ -41,11 +43,13 @@ jobs: # a basic unit of work in a run
           command: xcodebuild ARCHS=arm64 ONLY_ACTIVE_ARCH=NO
       - run: 
           name: Preserve App Binary
-          command: mv build/Release/circleci-demo-macos.app ~/app/circleci-demo-macos-arm64.app
+          command: |
+            mkdir ~/app_arm64
+            mv build/Release/circleci-demo-macos.app ~/app_arm64/circleci-demo-macos-arm64.app
       - persist_to_workspace:
           root: ~/
           paths: 
-            - app
+            - app_arm64
 
   package:
     executor: macos
@@ -54,7 +58,7 @@ jobs: # a basic unit of work in a run
           at: ~/app
       - run:
           name: Merge Binaries
-          command: lipo ~/app/circleci-demo-macos-arm64.app ~/app/circleci-demo-macos-x86_64.app -create -output circleci-demo-macos.app
+          command: lipo ~/app_arm64/circleci-demo-macos-arm64.app ~/app_x86_64/circleci-demo-macos-x86_64.app -create -output circleci-demo-macos.app
       - run:
           name: Compress app for storage
           command: zip -r app.zip circleci-demo-macos.app
