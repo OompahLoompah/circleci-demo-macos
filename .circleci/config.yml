@@ -1,22 +1,69 @@
 version: 2 # use version 2.0 of CircleCI
-jobs: # a basic unit of work in a run
-  build: # runs not using `Workflows` must have a `build` job as entry point
+executors:
+  macos:
     macos:  # indicate that we are using the macOS executor
       xcode: "12.3.0" # indicate our selected version of Xcode
-      resource_class: large
+    working_directory: ~/app
+jobs: # a basic unit of work in a run
+  test:
+    executor: macos
     steps: # a series of commands to run
       - checkout  # pull down code from your version control system.
       - run:
           # run our tests using xcode's cli tool `xcodebuild`
           name: Run Unit Tests
           command: xcodebuild test -scheme circleci-demo-macos
+
+  build_x86_64:
+    executor: macos
+    steps: # a series of commands to run
+      - checkout  # pull down code from your version control system.
       - run:
           # build our application
           name: Build Application
-          command: xcodebuild
+          command: xcodebuild ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO
+      - run: 
+          name: Preserve App Binary
+          command: mv build/Release/circleci-demo-macos.app ~/app/circleci-demo-macos-x86_64.app
+
+  build_arm64:
+    executor: macos
+    steps: # a series of commands to run
+      - checkout  # pull down code from your version control system.
+      - run:
+          # build our application
+          name: Build Application
+          command: xcodebuild ARCHS=arm64 ONLY_ACTIVE_ARCH=NO
+      - run: 
+          name: Preserve App Binary
+          command: mv build/Release/circleci-demo-macos.app ~/app/circleci-demo-macos-arm64.app
+
+  package:
+    executor: macos
+    steps: # a series of commands to run
+      - checkout  # pull down code from your version control system.
+      - run:
+          name: Merge Binaries
+          command: lipo ServiceCore-armv7 ServiceCore-arm64 \
+                     -create -output circleci-demo-macos.app
       - run:
           name: Compress app for storage
-          command: zip -r app.zip build/Release/circleci-demo-macos.app
+          command: zip -r app.zip circleci-demo-macos.app
       - store_artifacts:
           path: app.zip
           destination: app
+
+workflows:
+  build_and_deploy:
+    jobs:
+      - test
+      - build_x86_64:
+          requires:
+            - test
+      - build_arm64:
+          requires:
+            - test
+      - package:
+          requires:
+            - build_x86_64
+            - build_arm64
