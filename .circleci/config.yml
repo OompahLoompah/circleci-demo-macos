@@ -45,8 +45,7 @@ jobs: # a basic unit of work in a run
       - checkout  # pull down code from your version control system.
       - run:
           name: Merge Binaries
-          command: lipo ~/app/circleci-demo-macos-arm64.app ~/app/circleci-demo-macos-x86_64.app \
-                     -create -output circleci-demo-macos.app
+          command: lipo ~/app/circleci-demo-macos-arm64.app ~/app/circleci-demo-macos-x86_64.app -create -output circleci-demo-macos.app
       - run:
           name: Compress app for storage
           command: zip -r app.zip circleci-demo-macos.app
