@@ -58,7 +58,7 @@ jobs: # a basic unit of work in a run
           at: ~/app
       - run:
           name: Merge Binaries
-          command: lipo ~/app_arm64/circleci-demo-macos-arm64.app ~/app_x86_64/circleci-demo-macos-x86_64.app -create -output circleci-demo-macos.app
+          command: lipo ~/app/app_arm64/circleci-demo-macos-arm64.app ~/app/app_x86_64/circleci-demo-macos-x86_64.app -create -output circleci-demo-macos.app
       - run:
           name: Compress app for storage
           command: zip -r app.zip circleci-demo-macos.app
