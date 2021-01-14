@@ -26,6 +26,10 @@ jobs: # a basic unit of work in a run
       - run: 
           name: Preserve App Binary
           command: mv build/Release/circleci-demo-macos.app ~/app/circleci-demo-macos-x86_64.app
+      - persist_to_workspace:
+          root: ~/
+          paths: 
+            - app
 
   build_arm64:
     executor: macos
@@ -38,11 +42,16 @@ jobs: # a basic unit of work in a run
       - run: 
           name: Preserve App Binary
           command: mv build/Release/circleci-demo-macos.app ~/app/circleci-demo-macos-arm64.app
+      - persist_to_workspace:
+          root: ~/
+          paths: 
+            - app
 
   package:
     executor: macos
     steps: # a series of commands to run
-      - checkout  # pull down code from your version control system.
+      - attach_workspace:
+          at: ~/app
       - run:
           name: Merge Binaries
           command: lipo ~/app/circleci-demo-macos-arm64.app ~/app/circleci-demo-macos-x86_64.app -create -output circleci-demo-macos.app
