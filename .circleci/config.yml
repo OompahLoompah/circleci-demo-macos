@@ -3,7 +3,7 @@ version: 2.1
 executors:
   macos:
     macos:  # indicate that we are using the macOS executor
-      xcode: "11.7.0" # indicate our selected version of Xcode
+      xcode: "0.0.0451" # indicate our selected version of Xcode
     working_directory: ~/app
 jobs: # a basic unit of work in a run
   test:
